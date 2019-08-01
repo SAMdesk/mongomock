@@ -2146,6 +2146,21 @@ class MongoClientAggregateTest(_CollectionComparisonTest):
         ]
         self.cmp.compare_ignore_order.aggregate(pipeline)
 
+    def test__aggregate_unwind_project_id(self):
+        self.cmp.do.insert_one({
+            '_id': 'id0',
+            'c2': [
+                {'_id': 'id1', 'o': 'x'},
+                {'_id': 'id2', 'o': 'y'},
+                {'_id': 'id3', 'o': 'z'},
+            ],
+        })
+        pipeline = [
+            {'$unwind': '$c2'},
+            {'$project': {'_id': '$c2._id', 'o': '$c2.o'}},
+        ]
+        self.cmp.compare_ignore_order.aggregate(pipeline)
+
     def test__aggregate17(self):
         pipeline = [
             {'$project': {'_id': 0, 'created': {'$subtract': [{'$min': ['$a', '$b']}, '$count']}}}
