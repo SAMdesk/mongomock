@@ -162,7 +162,14 @@ def _not_op(d, k, s):
 
 def _not_nothing_and(f):
     """wrap an operator to return False if the first arg is NOTHING"""
-    return lambda v, l: v is not NOTHING and f(v, l)
+    def wrapper(function):
+        print(function)
+        if function == operator.gt:
+            # conversion of v,l
+            print("In here")
+        return lambda v, l: v is not NOTHING and function(v, l)
+
+    return wrapper(f)
 
 
 def _elem_match_op(doc_val, query):
