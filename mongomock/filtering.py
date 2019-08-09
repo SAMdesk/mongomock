@@ -73,7 +73,7 @@ def _sanitize_search(search, doc_val):
                 date = search.get('$gt')
                 if date.tzinfo is not None:
                     search['$gt'] = _remove_tz_info(date)
-                if not isinstance(doc_val, datetime):
+                if doc_val is not NOTHING and doc_val is not isinstance(doc_val, datetime):
                     doc_val = _remove_tz_info(doc_val)
     return search, doc_val
 
