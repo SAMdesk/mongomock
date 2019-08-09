@@ -34,7 +34,7 @@ def filter_applies(search_filter, document):
             continue
 
         for doc_val in iter_key_candidates(key, document):
-            search = _sanitize_search(search)
+            search, doc_val = _sanitize_search(search, doc_val)
             if isinstance(search, dict):
                 is_match = all(
                     operator_string in OPERATOR_MAP and
@@ -66,14 +66,16 @@ def filter_applies(search_filter, document):
 
 
 # This current specifically for non-naive-datetimes
-def _sanitize_search(search):
+def _sanitize_search(search, doc_val):
     if isinstance(search, dict):
         if search.get('$gt', False):
             if isinstance(search.get('$gt'), datetime):
                 date = search.get('$gt')
                 if date.tzinfo is not None:
                     search['$gt'] = _remove_tz_info(date)
-    return search
+                if not isinstance(doc_val, datetime):
+                    doc_val = _remove_tz_info(doc_val)
+    return search, doc_val
 
 
 def _remove_tz_info(date):
