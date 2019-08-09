@@ -80,8 +80,12 @@ def _sanitize_search(search, doc_val):
 
 def _remove_tz_info(date):
     date = str(date).split('+')
-    date = datetime.strptime(date[0], "%Y-%m-%d %H:%M:%S.%f")
-    return date
+    try:
+        date = datetime.strptime(date[0], "%Y-%m-%d %H:%M:%S.%f")
+    except ValueError:
+        date = datetime.strptime(date[0], "%Y-%m-%d %H:%M:%S")
+    finally:
+        return date
 
 
 def iter_key_candidates(key, doc):
