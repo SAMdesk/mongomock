@@ -34,6 +34,7 @@ def filter_applies(search_filter, document):
             continue
 
         for doc_val in iter_key_candidates(key, document):
+            search = _sanitize_search(search)
             if isinstance(search, dict):
                 is_match = all(
                     operator_string in OPERATOR_MAP and
@@ -62,6 +63,23 @@ def filter_applies(search_filter, document):
             return False
 
     return True
+
+
+# This current specifically for non-naive-datetimes
+def _sanitize_search(search):
+    if isinstance(search, dict):
+        if search.get('$gt', False):
+            if isinstance(search.get('$gt'), datetime):
+                date = search.get('$gt')
+                if date.tzinfo is not None:
+                    search['$gt'] = _remove_tz_info(date)
+    return search
+
+
+def _remove_tz_info(date):
+    date = str(date).split('+')
+    date = datetime.strptime(date[0], "%Y-%m-%d %H:%M:%S.%f")
+    return date
 
 
 def iter_key_candidates(key, doc):
@@ -162,14 +180,8 @@ def _not_op(d, k, s):
 
 def _not_nothing_and(f):
     """wrap an operator to return False if the first arg is NOTHING"""
-    def wrapper(function):
-        print(function)
-        if function == operator.gt:
-            # conversion of v,l
-            print("In here")
-        return lambda v, l: v is not NOTHING and function(v, l)
-
-    return wrapper(f)
+    """wrap an operator to return False if the first arg is NOTHING"""
+    return lambda v, l: v is not NOTHING and f(v, l)
 
 
 def _elem_match_op(doc_val, query):
